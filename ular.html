@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Ular</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <script>
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.appendChild(canvas);
+
+        canvas.width = 800;
+        canvas.height = 600;
+
+        const blockSize = 20;
+        let snake = [{ x: 200, y: 200 }];
+        let food = {
+            x: Math.floor(Math.random() * canvas.width / blockSize) * blockSize,
+            y: Math.floor(Math.random() * canvas.height / blockSize) * blockSize
+        };
+        let dx = blockSize;
+        let dy = 0;
+        let speed = 150; // Kecepatan awal lebih lambat
+        let score = 0;
+
+        function drawSnake() {
+            ctx.fillStyle = 'green';
+            snake.forEach(segment => {
+                ctx.fillRect(segment.x, segment.y, blockSize, blockSize);
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, blockSize, blockSize);
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                speed = Math.max(60, speed - 10); // Penurunan kecepatan lebih kecil
+                food.x = Math.floor(Math.random() * canvas.width / blockSize) * blockSize;
+                food.y = Math.floor(Math.random() * canvas.height / blockSize) * blockSize;
+            } else {
+                snake.pop();
+            }
+        }
+
+        function checkCollision() {
+            const head = snake[0];
+
+            // Cek tabrakan dengan dinding
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                return true;
+            }
+
+            // Cek tabrakan dengan tubuh sendiri
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function gameLoop() {
+            if (checkCollision()) {
+                alert(`Permainan selesai! Skor Anda: ${score}`);
+                snake = [{ x: 200, y: 200 }];
+                dx = blockSize;
+                dy = 0;
+                speed = 150; // Kecepatan reset lebih lambat
+                score = 0;
+                food = {
+                    x: Math.floor(Math.random() * canvas.width / blockSize) * blockSize,
+                    y: Math.floor(Math.random() * canvas.height / blockSize) * blockSize
+                };
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawFood();
+                moveSnake();
+                drawSnake();
+            }
+
+            setTimeout(gameLoop, speed);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    if (dy === 0) {
+                        dx = 0;
+                        dy = -blockSize;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (dy === 0) {
+                        dx = 0;
+                        dy = blockSize;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (dx === 0) {
+                        dx = -blockSize;
+                        dy = 0;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (dx === 0) {
+                        dx = blockSize;
+                        dy = 0;
+                    }
+                    break;
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
